@@ -1,5 +1,7 @@
 import express from "express";
+import cors from "cors";
 import "express-async-errors";
+import morgan from "morgan";
 
 // ----- DOT ENV ----- //
 import dotenv from "dotenv";
@@ -18,6 +20,10 @@ import authRouter from "./routes/authRoutes.js";
 import jobsRouter from "./routes/jobsRoutes.js";
 
 // ----- ROUTES ----- //
+if (process.env.NODE_ENV !== "production") {
+  app.use(morgan("dev"));
+}
+app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
