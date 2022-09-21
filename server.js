@@ -1,10 +1,13 @@
 import express from "express";
+import "express-async-errors";
+
+// ----- DOT ENV ----- //
 import dotenv from "dotenv";
 dotenv.config();
-const app = express();
 
 // ----- DATABASE ----- //
 import connectDB from "./db/connect.js";
+const app = express();
 
 // ----- MIDDLEWARE ----- //
 import notFoundMiddleware from "./middleware/not-found.js";
