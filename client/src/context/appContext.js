@@ -13,6 +13,9 @@ import {
   LOGIN_USER_ERROR,
   TOGGLE_SIDEBAR,
   LOGOUT_USER,
+  UPDATE_USER_BEGIN,
+  UPDATE_USER_SUCCESS,
+  UPDATE_USER_ERROR,
 } from "./actions";
 
 const token = localStorage.getItem("token");
@@ -27,8 +30,16 @@ const initialState = {
   user: user ? JSON.parse(user) : null,
   token: token,
   userLocation: userLocation || "",
-  jobLocation: userLocation || "",
   showSidebar: false,
+  isEditing: false,
+  editJobId: "",
+  position: "",
+  company: "",
+  jobLocation: userLocation || "",
+  jobTypeOptions: ["full-time", "part-time", "remote", "internship"],
+  jobType: "full-time",
+  statusOptions: ["pending", "interview", "declined"],
+  status: "pending",
 };
 
 const AppContext = React.createContext();
@@ -36,6 +47,35 @@ const AppContext = React.createContext();
 const AppProvider = ({ children }) => {
   // ** STATE
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  // ** AXIOS GLOBAL INSTANCES & INTERCEPTORS
+  const authFetch = axios.create({
+    baseURL: "/api/v1",
+  });
+
+  // request
+  authFetch.interceptors.request.use(
+    (config) => {
+      config.headers.common["Authorization"] = `Bearer ${state.token}`;
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+  // response
+  authFetch.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    (error) => {
+      if (error.response.status === 401) {
+        logoutUser();
+      }
+
+      return Promise.reject(error);
+    }
+  );
 
   // ----------ALERT MESSAGE----------- //
   const displayAlert = () => {
@@ -112,6 +152,28 @@ const AppProvider = ({ children }) => {
     removeUserFromLocalStorage();
   };
 
+  // ----------UPDATE USER----------- //
+  const updateUser = async (currentUser) => {
+    dispatch({ type: UPDATE_USER_BEGIN });
+    try {
+      const { data } = await authFetch.patch("/auth/updateUser", currentUser);
+      const { user, location, token } = data;
+      dispatch({
+        type: UPDATE_USER_SUCCESS,
+        payload: { user, location, token },
+      });
+      addUserToLocalStorage({ user, token, location });
+    } catch (error) {
+      if (error.response.status !== 401) {
+        dispatch({
+          type: UPDATE_USER_ERROR,
+          payload: { msg: error.response.data.msg },
+        });
+      }
+    }
+    clearAlert();
+  };
+
   // ----------SIDEBAR----------- //
   const toggleSidebar = () => {
     dispatch({ type: TOGGLE_SIDEBAR });
@@ -129,6 +191,7 @@ const AppProvider = ({ children }) => {
         loginUser,
         toggleSidebar,
         logoutUser,
+        updateUser,
       }}
     >
       {children}

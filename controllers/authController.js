@@ -11,7 +11,6 @@ const register = async (req, res) => {
   }
 
   const userAlreadyExists = await User.findOne({ email });
-
   if (userAlreadyExists) {
     throw new BadRequestError("Email already in use");
   }
@@ -33,19 +32,16 @@ const register = async (req, res) => {
 // ----- LOGIN ----- //
 const login = async (req, res) => {
   const { email, password } = req.body;
-
   if (!email || !password) {
     throw new BadRequestError("Please provide all values");
   }
 
   const user = await User.findOne({ email }).select("+password");
-
   if (!user) {
     throw new UnAuthenticatedError("Invalid credentials");
   }
 
   const isPasswordCorrect = await user.comparePassword(password);
-
   if (!isPasswordCorrect) {
     throw new UnAuthenticatedError("Invalid credentials");
   }
@@ -57,7 +53,23 @@ const login = async (req, res) => {
 
 // ----- UPDATE USER ----- //
 const updateUser = async (req, res) => {
-  res.send("update user");
+  const { name, email, lastName, location } = req.body;
+
+  if (!name || !email || !lastName || !location) {
+    throw new BadRequestError("Please provide all values");
+  }
+  const user = await User.findOne({ _id: req.user.userId });
+
+  user.email = email;
+  user.name = name;
+  user.lastName = lastName;
+  user.location = location;
+
+  await user.save();
+
+  const token = user.createJWT();
+
+  res.status(StatusCodes.OK).json({ user, token, location: user.location });
 };
 
 export { register, login, updateUser };
