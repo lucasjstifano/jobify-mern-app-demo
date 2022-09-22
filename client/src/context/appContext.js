@@ -8,6 +8,11 @@ import {
   REGISTER_USER_BEGIN,
   REGISTER_USER_ERROR,
   REGISTER_USER_SUCCESS,
+  LOGIN_USER_BEGIN,
+  LOGIN_USER_SUCCESS,
+  LOGIN_USER_ERROR,
+  TOGGLE_SIDEBAR,
+  LOGOUT_USER,
 } from "./actions";
 
 const token = localStorage.getItem("token");
@@ -23,13 +28,16 @@ const initialState = {
   token: token,
   userLocation: userLocation || "",
   jobLocation: userLocation || "",
+  showSidebar: false,
 };
 
 const AppContext = React.createContext();
 
 const AppProvider = ({ children }) => {
+  // ** STATE
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  // ----------ALERT MESSAGE----------- //
   const displayAlert = () => {
     dispatch({ type: DISPLAY_ALERT });
     clearAlert();
@@ -41,18 +49,20 @@ const AppProvider = ({ children }) => {
     }, 3000);
   };
 
+  // ----------HELPERS----------- //
   const addUserToLocalStorage = ({ user, token, location }) => {
     localStorage.setItem("user", JSON.stringify(user));
     localStorage.setItem("token", token);
     localStorage.setItem("location", location);
   };
 
-  const removeUserToLocalStorage = () => {
-    localStorage.setItem("user");
-    localStorage.setItem("token");
-    localStorage.setItem("location");
+  const removeUserFromLocalStorage = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("location");
   };
 
+  // ----------REGISTER----------- //
   const registerUser = async (currentUser) => {
     dispatch({ type: REGISTER_USER_BEGIN });
 
@@ -75,10 +85,53 @@ const AppProvider = ({ children }) => {
     clearAlert();
   };
 
+  // ----------LOGIN----------- //
+  const loginUser = async (currentUser) => {
+    dispatch({ type: LOGIN_USER_BEGIN });
+
+    try {
+      const { data } = await axios.post("/api/v1/auth/login", currentUser);
+      const { user, token, location } = data;
+      dispatch({
+        type: LOGIN_USER_SUCCESS,
+        payload: { user, token, location },
+      });
+      addUserToLocalStorage({ user, token, location });
+    } catch (error) {
+      dispatch({
+        type: LOGIN_USER_ERROR,
+        payload: { msg: error.response.data.msg },
+      });
+    }
+    clearAlert();
+  };
+
+  // ----------LOGOUT----------- //
+  const logoutUser = () => {
+    dispatch({ type: LOGOUT_USER });
+    removeUserFromLocalStorage();
+  };
+
+  // ----------SIDEBAR----------- //
+  const toggleSidebar = () => {
+    dispatch({ type: TOGGLE_SIDEBAR });
+  };
+
+  // ----------------------------- //
+  // ----------FUNCTION----------- //
+  // ----------------------------- //
   return (
-    <AppContext.Provider value={{ ...state, displayAlert, registerUser }}>
-      {" "}
-      {children}{" "}
+    <AppContext.Provider
+      value={{
+        ...state,
+        displayAlert,
+        registerUser,
+        loginUser,
+        toggleSidebar,
+        logoutUser,
+      }}
+    >
+      {children}
     </AppContext.Provider>
   );
 };
