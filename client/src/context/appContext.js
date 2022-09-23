@@ -23,6 +23,7 @@ import {
   CREATE_JOB_ERROR,
   GET_JOBS_BEGIN,
   GET_JOBS_SUCCESS,
+  SET_EDIT_JOB,
 } from "./actions";
 
 const token = localStorage.getItem("token");
@@ -253,6 +254,24 @@ const AppProvider = ({ children }) => {
     clearAlert();
   };
 
+  // ----------SET EDIT JOB----------- //
+  const setEditJob = async (id) => {
+    dispatch({
+      type: SET_EDIT_JOB,
+      payload: { id },
+    });
+  };
+
+  // ----------EDIT JOB----------- //
+  const editJob = () => {
+    console.log("edit job");
+  };
+
+  // ----------DELETE JOB----------- //
+  const deleteJob = async (id) => {
+    console.log(`delete job : ${id}`);
+  };
+
   // ----------------------------- //
   // ----------FUNCTION----------- //
   // ----------------------------- //
@@ -270,6 +289,9 @@ const AppProvider = ({ children }) => {
         clearValues,
         createJob,
         getJobs,
+        setEditJob,
+        deleteJob,
+        editJob,
       }}
     >
       {children}
