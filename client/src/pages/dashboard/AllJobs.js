@@ -1,7 +1,13 @@
 import React from "react";
+import { JobContainer, SearchContainer } from "../../components";
 
 const AllJobs = () => {
-  return <h1>All Job Page</h1>;
+  return (
+    <>
+      <SearchContainer />
+      <JobContainer />
+    </>
+  );
 };
 
 export default AllJobs;
