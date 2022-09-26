@@ -306,6 +306,24 @@ const AppProvider = ({ children }) => {
     }
   };
 
+  // ----------DELETE JOB----------- //
+  const showStats = async (jobId) => {
+    dispatch({ type: SHOW_STATS_BEGIN });
+    try {
+      const { data } = await authFetch(`/jobs/stats`);
+      dispatch({
+        type: SHOW_STATS_SUCCESS,
+        payload: {
+          stats: data.defaultStats,
+          monthlyApplications: data.monthlyApplications,
+        },
+      });
+    } catch (error) {
+      console.log(error.response);
+      // logoutUser();
+    }
+  };
+
   // ----------------------------- //
   // ----------FUNCTION----------- //
   // ----------------------------- //
@@ -326,6 +344,7 @@ const AppProvider = ({ children }) => {
         setEditJob,
         deleteJob,
         editJob,
+        showStats,
       }}
     >
       {children}
