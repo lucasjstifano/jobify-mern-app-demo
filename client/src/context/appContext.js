@@ -58,6 +58,8 @@ const initialState = {
   totalJobs: 0,
   numOfPages: 1,
   page: 1,
+  stats: {},
+  monthlyApplications: [],
 };
 
 const AppContext = React.createContext();
@@ -307,10 +309,10 @@ const AppProvider = ({ children }) => {
   };
 
   // ----------DELETE JOB----------- //
-  const showStats = async (jobId) => {
+  const showStats = async () => {
     dispatch({ type: SHOW_STATS_BEGIN });
     try {
-      const { data } = await authFetch(`/jobs/stats`);
+      const { data } = await authFetch("/jobs/stats");
       dispatch({
         type: SHOW_STATS_SUCCESS,
         payload: {
@@ -322,6 +324,7 @@ const AppProvider = ({ children }) => {
       console.log(error.response);
       // logoutUser();
     }
+    clearAlert();
   };
 
   // ----------------------------- //
