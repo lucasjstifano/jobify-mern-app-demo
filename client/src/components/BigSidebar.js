@@ -5,7 +5,7 @@ import Logo from "./Logo";
 import NavLinks from "./NavLinks";
 
 const BigSidebar = () => {
-  const { showSidebar, toggleSidebar } = useAppContext();
+  const { showSidebar } = useAppContext();
 
   return (
     <Wrapper>
@@ -18,7 +18,7 @@ const BigSidebar = () => {
           <header>
             <Logo />
           </header>
-          <NavLinks toggleSidebar={toggleSidebar} />
+          <NavLinks />
         </div>
       </div>
     </Wrapper>
